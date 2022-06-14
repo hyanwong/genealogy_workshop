@@ -272,9 +272,9 @@ class Workshop:
     def Q6(self):
         for i, v in enumerate(self.ts.variants()):
             if i == 0:
-                a1 = v.genotypes[0]
+                a1 = int(v.genotypes[0])
             if i == self.ts.num_sites-1:
-                a2 = v.genotypes[1]
+                a2 = int(v.genotypes[1])
 
         display_quiz([
             {
