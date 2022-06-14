@@ -1,4 +1,6 @@
 tskit
 msprime
+demesdraw
+seaborn
 numpy
 jupyterquiz
