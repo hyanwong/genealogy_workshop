@@ -1,4 +1,5 @@
 import msprime
+import tskit
 import numpy as np
 from IPython.core.display import HTML
 from jupyterquiz import display_quiz
@@ -9,11 +10,15 @@ def _setup_data():
     return ts
     
 class Workshop:
-    css = "<style>h6 {color: white; background-color: green; padding: 4px; display: block; }</style>"
+    css = """<style>
+        dl {border: green 1px solid; margin-top: 1em}
+        dt {color: white; background-color: green; padding: 4px; display: block; }
+        dd {padding: 4px;}
+    </style>"""
 
     def __init__(self):
         self.ts = self.simulate_ts()
-        assert self.ts.num_mutations == self.ts.num_sites  # check it is like an infinite sites model
+        assert len(self.ts.site(12).mutations) == 2  # check there are sites with multiple mutations
         self.ts.dump("simulated.trees")
 
     def simulate_ts(self):
@@ -23,25 +28,27 @@ class Workshop:
         sweep_model = msprime.SweepGenicSelection(
             position=seq_length/2, start_frequency=0.001, end_frequency=0.999, s=0.25, dt=1e-6)
         
-        return msprime.sim_mutations(
-            msprime.sim_ancestry(
-                10,
-                model=[sweep_model, msprime.StandardCoalescent()],
-                population_size=pop_size,
-                sequence_length=seq_length,
-                recombination_rate=1e-8,
-                random_seed=654321,  # only needed for repeatabilty
-                ),
-            # add finite-site mutations to the ts using the Jukes & Cantor model, creating SNPs
-            rate=2e-8,
-            random_seed=123456
+        ts = msprime.sim_ancestry(
+            10,
+            model=[sweep_model, msprime.StandardCoalescent()],
+            population_size=pop_size,
+            sequence_length=seq_length,
+            recombination_rate=1e-8,
+            random_seed=654321,  # only needed for repeatabilty
         )
-
+        ts = msprime.sim_mutations(ts, rate=2e-8, random_seed=203)
+        tables = ts.dump_tables()
+        tables.individuals.metadata_schema = tskit.MetadataSchema.permissive_json()
+        tables.individuals.packset_metadata([
+            tables.individuals.metadata_schema.validate_and_encode_row({"name": n})
+            for n in ["Ada", "Bob", "Cat", "Dee", "Eli", "Fi", "Guy", "Hal", "Ida", "Jo"]
+        ])
+        return tables.tree_sequence()
         
     def Q1(self):
         display_quiz([
             {
-                "question": "How many edges in the tree sequence:",
+                "question": "How many edges in this tree sequence?",
                 "type": "numeric",
                 "answers": [
                     {
@@ -59,7 +66,7 @@ class Workshop:
                 ]
             },
             {
-                "question": "How many sites in the tree sequence:",
+                "question": "How many sites in this tree sequence?",
                 "type": "numeric",
                 "answers": [
                     {
@@ -77,7 +84,7 @@ class Workshop:
                 ]
             },
             {
-                "question": "How many mutations in the tree sequence:",
+                "question": "How many mutations in this tree sequence?",
                 "type": "numeric",
                 "answers": [
                     {
@@ -85,45 +92,58 @@ class Workshop:
                         "value": self.ts.num_mutations,
                         "correct": True,
                         "feedback": 
-                            "Correct: there are the same number of mutations "
-                            "as sites, because in this tree sequence we have only "
-                            "created VARIABLE sites, and have only one mutation per "
-                            "site (like an infinite sites model)"
+                            "Correct: there may be more mutations than sites because "
+                            "there could be multiple mutations at a single site"
                     },
                     {
                         "type": "range",
                         "range": [ -100000000, 100000], 
                         "correct": False,
-                        "feedback": "Try again (hint: look at `ts.num_sites()`)"
+                        "feedback": "Try again (hint: look at `ts.num_mutations()`)"
                     },
                 ]
             },
         ])
 
     def Q2(self):
-        display_quiz([{
-            "question":
-                "What is the age of the root in the first tree (to 1 d.p.)",
-            "type": "numeric",
-            "precision": 1,
-            "answers": [
-                {
-                    "type": "value",
-                    "value": round(self.ts.node(self.ts.first().root).time, 1),
-                    "correct": True,
-                    "feedback": "Correct."
-                },
-                {
-                    "type": "range",
-                    "range": [ -100000000, 1000000], 
-                    "correct": False,
-                    "feedback":
-                        "Try again (hint: the root node in the first tree "
-                        f"has ID {self.ts.first().root};"
-                        " feed that to the `ts.node()` method)"
-                },
-            ]
-        }])
+        display_quiz([
+            {
+                "question": "How many mutations at site 11?",
+                "type": "numeric",
+                "answers": [
+                    {
+                        "type": "value",
+                        "value": len(self.ts.site(11).mutations),
+                        "correct": True,
+                        "feedback": "Correct."
+                    },
+                    {
+                        "type": "range",
+                        "range": [ -100000000, 100000], 
+                        "correct": False,
+                        "feedback": "Try again (hint: look at `ts.site(11)`)"
+                    },
+                ]
+            },
+            {
+                "question": "How many mutations at site 12:",
+                "type": "numeric",
+                "answers": [
+                    {
+                        "type": "value",
+                        "value": len(self.ts.site(12).mutations),
+                        "correct": True,
+                        "feedback": "Correct."
+                    },
+                    {
+                        "type": "range",
+                        "range": [ -100000000, 100000], 
+                        "correct": False,
+                        "feedback": "Try again (hint: look at `ts.site(12)`)"
+                    },
+                ]
+            },
+        ])
 
     def Q3(self):
         tree = self.ts.at(400_000)
@@ -131,7 +151,8 @@ class Workshop:
         display_quiz([
             {
                 "question":
-                    "How many mutations in total are there in the tree at position 400Kb",
+                    "How many mutations in total are there in the tree at position "
+                    "400 Kb?",
                 "type": "numeric",
                 "answers": [
                     {
@@ -151,7 +172,8 @@ class Workshop:
             },
             {
                 "question":
-                    "How many singleton mutations (above one sample, i.e. on a terminal branch)",
+                    "How many singleton mutations (above one sample, i.e. on a terminal "
+                    "branch) are there in the tree at position 400 Kb?",
                 "type": "numeric",
                 "answers": [
                     {
@@ -171,7 +193,8 @@ class Workshop:
             },
             {
                 "question":
-                    "How many doubleton mutations (above 2 samples)",
+                    "How many doubleton mutations (above 2 samples) are there in the "
+                    "tree at position 400 Kb?",
                 "type": "numeric",
                 "answers": [
                     {
@@ -190,6 +213,55 @@ class Workshop:
                 ]
             },
         ])
+
+    def Q4(self):
+        display_quiz([{
+            "question":
+                "What is the age (to the nearest generation) of the root in the first "
+                "tree?",
+            "type": "numeric",
+            "precision": 0,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": round(self.ts.node(self.ts.first().root).time, 1),
+                    "correct": True,
+                    "feedback": "Correct."
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again (hint: the root node in the tree "
+                        f"has ID {self.ts.first().root};"
+                        " feed that to the `ts.node()` method)"
+                },
+            ]
+        }])
+
+    def Q5(self):
+        correct_name = self.ts.individual(self.ts.node(14).individual).metadata["name"]
+        display_quiz([{
+            "question":
+                "What is the name of the individual associated with sample node 14 "
+                "in the original tree sequence?",
+            "type": "multiple_choice",
+            "answers": [
+                {
+                    "answer": i.metadata["name"],
+                    "correct": i.metadata["name"] == correct_name,
+                    "feedback": (
+                        "Correct" if i.metadata["name"] == correct_name
+                        else "Sorry, that's not right."
+                        )
+                }
+                for i in self.ts.individuals()
+            ]
+        }])
+
+
+
 
 def setup():
     return Workshop()
