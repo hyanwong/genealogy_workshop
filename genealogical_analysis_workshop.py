@@ -16,6 +16,15 @@ class Workshop:
         dd {padding: 4px;}
     </style>"""
 
+    # Used for making SVG formatting smaller
+    small_class = "x-lab-sml"
+    small_style = (
+        ".x-lab-sml .sym {transform:scale(0.6)} .x-lab-sml .lab {font-size:7pt;}" # All labels small
+        ".x-lab-sml .x-axis .tick .lab {"
+        "font-weight:normal;transform:rotate(90deg);text-anchor:start;dominant-baseline:central;}"
+    )
+
+
     def __init__(self):
         self.ts = self.simulate_ts()
         assert len(self.ts.site(12).mutations) == 2  # check there are sites with multiple mutations
@@ -260,6 +269,39 @@ class Workshop:
             ]
         }])
 
+    def Q6(self):
+        for i, v in enumerate(self.ts.variants()):
+            if i == 0:
+                a1 = v.genotypes[0]
+            if i == self.ts.num_sites-1:
+                a2 = v.genotypes[1]
+
+        display_quiz([
+            {
+                "question":
+                    "What is the genotypic state of the first sample at the first site?",
+                "type": "multiple_choice",
+                "answers": [
+                    {
+                        "answer": f"{s}", "correct": (a1 == s),
+                        "feedback": ("Correct" if a1 == s else "Sorry, that's not right.")
+                    }
+                    for s in [0, 1]
+                ]
+            },
+            {
+                "question":
+                    "What is the genotypic state of the second sample at the last site?",
+                "type": "multiple_choice",
+                "answers": [
+                    {
+                        "answer": f"{s}", "correct": (a2 == s),
+                        "feedback": ("Correct" if a2 == s else "Sorry, that's not right.")
+                    }
+                    for s in [0, 1]
+                ]
+            },
+        ])
 
 
 
