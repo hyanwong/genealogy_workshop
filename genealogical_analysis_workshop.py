@@ -4,11 +4,6 @@ import numpy as np
 from IPython.core.display import HTML
 from jupyterquiz import display_quiz
 
-def _setup_data():
-    
-    
-    return ts
-    
 class Workshop:
     css = """<style>
         dl {border: green 1px solid; margin-top: 1em}
@@ -23,7 +18,6 @@ class Workshop:
         ".x-lab-sml .x-axis .tick .lab {"
         "font-weight:normal;transform:rotate(90deg);text-anchor:start;dominant-baseline:central;}"
     )
-
 
     def __init__(self):
         self.ts = self.simulate_ts()
@@ -249,7 +243,7 @@ class Workshop:
             ]
         }])
 
-    def Q5(self):
+    def Q5a(self):
         correct_name = self.ts.individual(self.ts.node(14).individual).metadata["name"]
         display_quiz([{
             "question":
@@ -266,6 +260,31 @@ class Workshop:
                         )
                 }
                 for i in self.ts.individuals()
+            ]
+        }])
+
+    def Q5b(self):
+        display_quiz([{
+            "question":
+                "How many populations are defined in this tree sequence?",
+            "type": "numeric",
+            "precision": 0,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": self.ts.num_populations,
+                    "correct": True,
+                    "feedback":
+                        "Correct. All nodes in the tree sequence belong to the same "
+                        "population (imaginatively named 'pop_0')"
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
             ]
         }])
 
@@ -302,6 +321,15 @@ class Workshop:
                 ]
             },
         ])
+
+    @staticmethod
+    def convert_metadata_to_new_format(ts):
+        # Quick hack to read individual and population metadata as a python dict
+        tables = ts.dump_tables()
+        tables.populations.metadata_schema = tskit.MetadataSchema.permissive_json()
+        tables.individuals.metadata_schema = tskit.MetadataSchema.permissive_json()
+        tables.sites.metadata_schema = tskit.MetadataSchema.permissive_json()
+        return tables.tree_sequence()
 
 
 
