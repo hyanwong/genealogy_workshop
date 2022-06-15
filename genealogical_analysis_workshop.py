@@ -1,8 +1,17 @@
 import msprime
 import tskit
+import tqdm
 import numpy as np
 from IPython.core.display import HTML
 from jupyterquiz import display_quiz
+
+
+class DownloadProgressBar(tqdm.tqdm):
+    def update_to(self, b=1, bsize=1, tsize=None):
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)
+
 
 class Workshop:
     css = """<style>
@@ -331,7 +340,10 @@ class Workshop:
         tables.sites.metadata_schema = tskit.MetadataSchema.permissive_json()
         return tables.tree_sequence()
 
-
+    @staticmethod
+    def download(url):
+        return DownloadProgressBar(
+            unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1])
 
 def setup():
     return Workshop()
