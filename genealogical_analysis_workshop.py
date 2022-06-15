@@ -13,7 +13,7 @@ class DownloadProgressBar(tqdm.tqdm):
         self.update(b * bsize - self.n)
 
 
-class Workshop:
+class Workbook:
     css = """<style>
         dl {border: green 1px solid; margin-top: 1em}
         dt {color: white; background-color: green; padding: 4px; display: block; }
@@ -27,6 +27,25 @@ class Workshop:
         ".x-lab-sml .x-axis .tick .lab {"
         "font-weight:normal;transform:rotate(90deg);text-anchor:start;dominant-baseline:central;}"
     )
+
+    # some useful functions
+    @staticmethod
+    def convert_metadata_to_new_format(ts):
+        # Quick hack to read individual and population metadata as a python dict
+        tables = ts.dump_tables()
+        tables.populations.metadata_schema = tskit.MetadataSchema.permissive_json()
+        tables.individuals.metadata_schema = tskit.MetadataSchema.permissive_json()
+        tables.sites.metadata_schema = tskit.MetadataSchema.permissive_json()
+        return tables.tree_sequence()
+
+    @staticmethod
+    def download(url):
+        return DownloadProgressBar(
+            unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1])
+
+
+
+class Workbook1(Workbook):
 
     def __init__(self):
         self.ts = self.simulate_ts()
@@ -297,7 +316,21 @@ class Workshop:
             ]
         }])
 
-    def Q6(self):
+    def Q6a(self):
+        display_quiz([
+            {
+                "question":
+                    "What alleles does Ada have at the first variable site",
+                "type": "multiple_choice",
+                "answers": [
+                    {"answer": f"Homozygous AA", "correct": False, "feedback": "Try again"},
+                    {"answer": f"Heterozygous AC", "correct": True, "feedback": "Correct"},
+                    {"answer": f"Homozygous CC", "correct": False, "feedback": "Try again"},
+                ]
+            },
+        ])
+
+    def Q6b(self):
         for i, v in enumerate(self.ts.variants()):
             if i == 0:
                 a1 = int(v.genotypes[0])
@@ -331,21 +364,71 @@ class Workshop:
             },
         ])
 
-    @staticmethod
-    def convert_metadata_to_new_format(ts):
-        # Quick hack to read individual and population metadata as a python dict
-        tables = ts.dump_tables()
-        tables.populations.metadata_schema = tskit.MetadataSchema.permissive_json()
-        tables.individuals.metadata_schema = tskit.MetadataSchema.permissive_json()
-        tables.sites.metadata_schema = tskit.MetadataSchema.permissive_json()
-        return tables.tree_sequence()
+class Workbook2(Workbook):
+    
+    
+    def __init__(self):
+        self.ts1 = msprime.sim_ancestry(
+            20,
+            sequence_length=1e6,
+            recombination_rate=1e-8,
+            population_size=20_000,
+            random_seed=2022,
+        )
+        self.mts1 = msprime.sim_mutations(self.ts1, rate=1e-8, random_seed=2022)
+    
+    def Q1(self):
+        display_quiz([{
+            "question":
+                "How many trees are in your newly simulated tree sequence?",
+            "type": "numeric",
+            "precision": 0,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": self.ts1.num_trees,
+                    "correct": True,
+                    "feedback":
+                        "Correct"
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
+            ]
+        }])
+        
+    def Q2(self):
+        display_quiz([{
+            "question":
+                "How many variable sites are in the tree sequence?",
+            "type": "numeric",
+            "precision": 0,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": self.mts1.num_sites,
+                    "correct": True,
+                    "feedback":
+                        "Correct"
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
+            ]
+        }])
 
-    @staticmethod
-    def download(url):
-        return DownloadProgressBar(
-            unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1])
+def setup_workbook1():
+    return Workbook1()
 
-def setup():
-    return Workshop()
+def setup_workbook2():
+    return Worksbook2()
         
 
