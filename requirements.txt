@@ -4,3 +4,4 @@ demesdraw
 seaborn
 numpy
 jupyterquiz
+tqdm
