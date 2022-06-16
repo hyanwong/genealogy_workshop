@@ -390,7 +390,7 @@ class Workbook2(Workbook):
     
         # Second model
         deme_size = 500 # population size of each deme
-        num_demes = 9
+        num_demes = 8
         num_deme_samples = 40
         demography = msprime.Demography.stepping_stone_model(
             [deme_size] * num_demes,
