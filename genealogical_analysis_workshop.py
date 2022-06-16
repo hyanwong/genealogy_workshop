@@ -530,10 +530,11 @@ class Workbook2(Workbook):
             "answers": [
                 {
                     "type": "value",
-                    "value": self.ts2.Fst(
-                        [self.ts2.samples(population=0),
-                        self.ts2.samples(population=3)]
-                    ),
+                    "value": float(
+                        self.ts2.Fst([
+                            self.ts2.samples(population=0),
+                            self.ts2.samples(population=3)
+                        ])),
                     "correct": True,
                     "feedback":
                         "Correct"
