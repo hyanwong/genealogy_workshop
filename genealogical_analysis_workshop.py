@@ -460,28 +460,52 @@ class Workbook2(Workbook):
         }])
 
     def Q3(self):
-        display_quiz([{
-            "question":
-                "How many variable sites are in the tree sequence?",
-            "type": "numeric",
-            "precision": 0,
-            "answers": [
-                {
-                    "type": "value",
-                    "value": self.mts1.num_sites,
-                    "correct": True,
-                    "feedback":
-                        "Correct"
-                },
-                {
-                    "type": "range",
-                    "range": [ -100000000, 1000000], 
-                    "correct": False,
-                    "feedback":
-                        "Try again"
-                },
-            ]
-        }])
+        display_quiz([
+            {
+                "question":
+                    "How many variable sites are in the tree sequence?",
+                "type": "numeric",
+                "precision": 0,
+                "answers": [
+                    {
+                        "type": "value",
+                        "value": self.mts1.num_sites,
+                        "correct": True,
+                        "feedback":
+                            "Correct"
+                    },
+                    {
+                        "type": "range",
+                        "range": [ -100000000, 1000000], 
+                        "correct": False,
+                        "feedback":
+                            "Try again"
+                    },
+                ]
+            },
+            {
+                "question":
+                    "How many big is the tree sequence, in MiB (binary megabytes) to 1 d.p.?",
+                "type": "numeric",
+                "precision": 1,
+                "answers": [
+                    {
+                        "type": "value",
+                        "value": round(self.mts1.nbytes/1024/1024, 1),
+                        "correct": True,
+                        "feedback":
+                            "Correct"
+                    },
+                    {
+                        "type": "range",
+                        "range": [ -100000000, 1000000], 
+                        "correct": False,
+                        "feedback":
+                            "Try again (hint - look at the 'Total Size' in the output table"
+                    },
+                ],
+            },
+        ])
 
     def Q4(self):
         display_quiz([{
