@@ -558,8 +558,7 @@ class Workbook2(Workbook):
             "answers": [
                 {
                     "type": "value",
-                    "value": round(self.Fst_0_1_mean_100_reps, 3)
-                    ),
+                    "value": round(self.Fst_0_1_mean_100_reps, 3),
                     "correct": True,
                     "feedback":
                         "Correct"
