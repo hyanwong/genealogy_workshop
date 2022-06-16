@@ -320,7 +320,8 @@ class Workbook1(Workbook):
         display_quiz([
             {
                 "question":
-                    "What alleles does Ada have at the first variable site",
+                    "What alleles does Dee have at the last variable site in the "
+                    "simplified tree sequence",
                 "type": "multiple_choice",
                 "answers": [
                     {"answer": f"Homozygous AA", "correct": False, "feedback": "Try again"},
@@ -368,8 +369,18 @@ class Workbook2(Workbook):
     
     
     def __init__(self):
+        small_ts = msprime.sim_ancestry(
+            samples=2,
+            sequence_length=1e3, # 1Kb
+            recombination_rate=1e-8, # allow for recombination
+            population_size=20_000, # a rough "effective population size" suitable for humans
+            random_seed=107
+        )
+        self.mts_small = msprime.sim_mutations(small_ts, rate=2e-7, random_seed=103)
+    
+        # First model
         self.ts1 = msprime.sim_ancestry(
-            20,
+            20_000,
             sequence_length=1e6,
             recombination_rate=1e-8,
             population_size=20_000,
@@ -377,6 +388,27 @@ class Workbook2(Workbook):
         )
         self.mts1 = msprime.sim_mutations(self.ts1, rate=1e-8, random_seed=2022)
     
+        # Second model
+        deme_size = 1_000 # population size of each deme
+        num_demes = 6
+        num_deme_samples = 5
+        demography = msprime.Demography.stepping_stone_model(
+            [deme_size] * num_demes,
+            migration_rate=0.01
+        )
+        ts = msprime.sim_ancestry(
+            {i: num_deme_samples for i in range(num_demes)},
+            sequence_length=1e6, # 1 Mbp
+            demography=demography,
+            recombination_rate=1e-8, # human-like recombination rate
+            random_seed=3,
+        )
+        self.ts2 =  msprime.sim_mutations(
+            ts,
+            rate=1e-8, # human-like mutation rate
+            random_seed=3
+        )
+            
     def Q1(self):
         display_quiz([{
             "question":
@@ -404,6 +436,32 @@ class Workbook2(Workbook):
     def Q2(self):
         display_quiz([{
             "question":
+                "What is the ID of the site with two mutations?",
+            "type": "numeric",
+            "precision": 0,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": [
+                        s.id for s in self.mts_small.sites() if len(s.mutations)==2
+                    ][0],
+                    "correct": True,
+                    "feedback":
+                        "Correct"
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
+            ]
+        }])
+
+    def Q3(self):
+        display_quiz([{
+            "question":
                 "How many variable sites are in the tree sequence?",
             "type": "numeric",
             "precision": 0,
@@ -425,10 +483,37 @@ class Workbook2(Workbook):
             ]
         }])
 
+    def Q4(self):
+        display_quiz([{
+            "question":
+                "What is the site-based Fst between population 0 and population 3?",
+            "type": "numeric",
+            "precision": 0,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": self.ts2.Fst(
+                        [self.ts2.samples(population=0),
+                        self.ts2.samples(population=3)]
+                    ),
+                    "correct": True,
+                    "feedback":
+                        "Correct"
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
+            ]
+        }])
+
 def setup_workbook1():
     return Workbook1()
 
 def setup_workbook2():
-    return Worksbook2()
+    return Workbook2()
         
 
