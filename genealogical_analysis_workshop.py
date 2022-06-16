@@ -499,7 +499,8 @@ class Workbook2(Workbook):
             },
             {
                 "question":
-                    "How many big is the tree sequence, in MiB (binary megabytes) to 1 d.p.?",
+                    "How many big is the tree sequence, in MiB (binary megabytes) "
+                    "to 1 decimal place?",
                 "type": "numeric",
                 "precision": 1,
                 "answers": [
@@ -524,9 +525,10 @@ class Workbook2(Workbook):
     def Q4(self):
         display_quiz([{
             "question":
-                "What is the site-based Fst between population 0 and population 3 (to 3 d.p.)?",
+                "What is the site-based Fst between population 0 and population 3 "
+                "(to 4 decimal places)?",
             "type": "numeric",
-            "precision": 3,
+            "precision": 4,
             "answers": [
                 {
                     "type": "value",
@@ -554,7 +556,7 @@ class Workbook2(Workbook):
         display_quiz([{
             "question":
                 "What is the mean branch-length Fst between samples from pop_0 and pop_1"
-                " (to 3 d.p)?",
+                " (to 3 decimal places)?",
             "type": "numeric",
             "precision": 3,
             "answers": [
