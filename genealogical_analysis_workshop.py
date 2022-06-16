@@ -390,11 +390,11 @@ class Workbook2(Workbook):
     
         # Second model
         deme_size = 1_000 # population size of each deme
-        num_demes = 6
+        num_demes = 9
         num_deme_samples = 5
         demography = msprime.Demography.stepping_stone_model(
             [deme_size] * num_demes,
-            migration_rate=0.01
+            migration_rate=0.001
         )
         ts = msprime.sim_ancestry(
             {i: num_deme_samples for i in range(num_demes)},
@@ -408,6 +408,20 @@ class Workbook2(Workbook):
             rate=1e-8, # human-like mutation rate
             random_seed=3
         )
+        
+        Fst_values = []
+        for ts in msprime.sim_ancestry(
+            {i: num_deme_samples for i in range(num_demes)},
+            sequence_length=1e6,
+            demography=demography,
+            recombination_rate=1e-8,
+            random_seed=1234,
+            num_replicates=100
+        ):
+            Fst = ts.Fst([ts.samples(0), ts.samples(1)], mode="branch")
+            Fst_values.append(float(Fst))
+
+        self.Fst_0_1_mean_100_reps = np.mean(Fst_values)
             
     def Q1(self):
         display_quiz([{
@@ -510,15 +524,41 @@ class Workbook2(Workbook):
     def Q4(self):
         display_quiz([{
             "question":
-                "What is the site-based Fst between population 0 and population 3?",
+                "What is the site-based Fst between population 0 and population 3 (to 3 d.p.)?",
             "type": "numeric",
-            "precision": 0,
+            "precision": 3,
             "answers": [
                 {
                     "type": "value",
                     "value": self.ts2.Fst(
                         [self.ts2.samples(population=0),
                         self.ts2.samples(population=3)]
+                    ),
+                    "correct": True,
+                    "feedback":
+                        "Correct"
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
+            ]
+        }])
+
+    def Q5(self):
+        display_quiz([{
+            "question":
+                "What is the mean branch-length Fst between samples from pop_0 and pop_1"
+                " (to 3 d.p)?",
+            "type": "numeric",
+            "precision": 3,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": round(self.Fst_0_1_mean_100_reps, 3)
                     ),
                     "correct": True,
                     "feedback":
