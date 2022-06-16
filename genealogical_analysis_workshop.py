@@ -394,7 +394,7 @@ class Workbook2(Workbook):
         num_deme_samples = 40
         demography = msprime.Demography.stepping_stone_model(
             [deme_size] * num_demes,
-            migration_rate=0.001
+            migration_rate=0.05
         )
         ts = msprime.sim_ancestry(
             {i: num_deme_samples for i in range(num_demes)},
