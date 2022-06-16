@@ -389,16 +389,16 @@ class Workbook2(Workbook):
         self.mts1 = msprime.sim_mutations(self.ts1, rate=1e-8, random_seed=2022)
     
         # Second model
-        deme_size = 1_000 # population size of each deme
+        deme_size = 500 # population size of each deme
         num_demes = 9
-        num_deme_samples = 5
+        num_deme_samples = 40
         demography = msprime.Demography.stepping_stone_model(
             [deme_size] * num_demes,
             migration_rate=0.001
         )
         ts = msprime.sim_ancestry(
             {i: num_deme_samples for i in range(num_demes)},
-            sequence_length=1e6, # 1 Mbp
+            sequence_length=2e6, # 1 Mbp
             demography=demography,
             recombination_rate=1e-8, # human-like recombination rate
             random_seed=3,
@@ -530,11 +530,11 @@ class Workbook2(Workbook):
             "answers": [
                 {
                     "type": "value",
-                    "value": float(
+                    "value": round(
                         self.ts2.Fst([
                             self.ts2.samples(population=0),
                             self.ts2.samples(population=3)
-                        ])),
+                        ]), 3),
                     "correct": True,
                     "feedback":
                         "Correct"
