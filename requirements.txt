@@ -1,7 +1,12 @@
 tskit
+tsinfer
+tsdate
+tszip
 msprime
 demesdraw
 seaborn
 numpy
 jupyterquiz
 tqdm
+matplotlib
+pandas
