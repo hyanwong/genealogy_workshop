@@ -391,21 +391,22 @@ class Workbook2(Workbook):
         # Second model
         deme_size = 500 # population size of each deme
         num_demes = 8
-        num_deme_samples = 40
+        num_deme_samples = 25
+        mu = 1e-8
         demography = msprime.Demography.stepping_stone_model(
             [deme_size] * num_demes,
             migration_rate=0.05
         )
         ts = msprime.sim_ancestry(
             {i: num_deme_samples for i in range(num_demes)},
-            sequence_length=2e6, # 1 Mbp
+            sequence_length=5e6, # 1 Mbp
             demography=demography,
             recombination_rate=1e-8, # human-like recombination rate
-            random_seed=3,
+            random_seed=123,
         )
-        self.ts2 =  msprime.sim_mutations(
+        self.mts =  msprime.sim_mutations(
             ts,
-            rate=1e-8, # human-like mutation rate
+            rate=mu, # human-like mutation rate
             random_seed=3
         )
         
@@ -533,11 +534,11 @@ class Workbook2(Workbook):
                 {
                     "type": "value",
                     "value": round(float(
-                        self.ts2.Fst([
-                            self.ts2.samples(population=0),
-                            self.ts2.samples(population=3)
+                        self.mts.Fst([
+                            self.mts.samples(population=0),
+                            self.mts.samples(population=3)
                         ])
-                    ), 3),
+                    ), 4),
                     "correct": True,
                     "feedback":
                         "Correct"
@@ -556,13 +557,13 @@ class Workbook2(Workbook):
         display_quiz([{
             "question":
                 "What is the mean branch-length Fst between samples from pop_0 and pop_1"
-                " (to 3 decimal places)?",
+                " (to 4 decimal places)?",
             "type": "numeric",
-            "precision": 3,
+            "precision": 4,
             "answers": [
                 {
                     "type": "value",
-                    "value": round(self.Fst_0_1_mean_100_reps, 3),
+                    "value": round(self.Fst_0_1_mean_100_reps, 4),
                     "correct": True,
                     "feedback":
                         "Correct"
