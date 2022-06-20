@@ -555,8 +555,33 @@ class Workbook2(Workbook):
     def Q5(self):
         display_quiz([{
             "question":
-                "What is the mean branch-length Fst between samples from pop_0 and pop_1"
-                " (to 3 decimal places)?",
+                "What is the site-based genetic diversity in both the original and "
+                "inferred tree sequences (to 3 decimal places)?",
+            "type": "numeric",
+            "precision": 3,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": round(self.mts1.diversity(), 3),
+                    "correct": True,
+                    "feedback":
+                        "Correct"
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
+            ]
+        }])
+
+    def Q6(self):
+        display_quiz([{
+            "question":
+                "What is the site-based genetic diversity in both the original and "
+                "inferred tree sequences (to 3 decimal places)?",
             "type": "numeric",
             "precision": 3,
             "answers": [
