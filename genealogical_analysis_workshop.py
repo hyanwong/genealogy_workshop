@@ -324,9 +324,9 @@ class Workbook1(Workbook):
                     "simplified tree sequence",
                 "type": "multiple_choice",
                 "answers": [
-                    {"answer": f"Homozygous AA", "correct": False, "feedback": "Try again"},
-                    {"answer": f"Heterozygous AC", "correct": True, "feedback": "Correct"},
-                    {"answer": f"Homozygous CC", "correct": False, "feedback": "Try again"},
+                    {"answer": "Homozygous AA", "correct": False, "feedback": "Try again"},
+                    {"answer": "Heterozygous AC", "correct": True, "feedback": "Correct"},
+                    {"answer": "Homozygous CC", "correct": False, "feedback": "Try again"},
                 ]
             },
         ])
@@ -579,6 +579,22 @@ class Workbook2(Workbook):
         }])
 
     def Q6(self):
+        display_quiz([
+            {
+                "question":
+                    "The first site was used for inference; what is its inference_type"
+                    " (as described in its metadata)?",
+                "type": "multiple_choice",
+                "answers": [
+                    {"answer": "parsimony", "correct": False, "feedback": "Try again"},
+                    {"answer": "full", "correct": True, "feedback": "Correct"},
+                    {"answer": "fuzzy", "correct": False, "feedback": "Try again"},
+                    {"answer": "potato", "correct": False, "feedback": "Really? You're joking, right?"},
+                ]
+            },
+        ])
+
+    def Q7(self):
         display_quiz([{
             "question":
                 "What is the site-based genetic diversity in both the original and "
@@ -591,7 +607,9 @@ class Workbook2(Workbook):
                     "value": round(float(self.mts1.diversity()), 3),
                     "correct": True,
                     "feedback":
-                        "Correct"
+                        "Correct: since this is a site-base measure, the same value will"
+                        " be obtained regardless of how accurately the genealogy has"
+                        " been inferred."
                 },
                 {
                     "type": "range",
