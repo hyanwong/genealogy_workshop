@@ -407,7 +407,7 @@ class Workbook2(Workbook):
         self.mts =  msprime.sim_mutations(
             ts,
             rate=mu, # human-like mutation rate
-            random_seed=3
+            random_seed=321
         )
         
         Fst_values = []
