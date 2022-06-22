@@ -633,7 +633,7 @@ class Workbook2(Workbook):
             "answers": [
                 {
                     "type": "value",
-                    "value": round(float(self.mts.diversity()), 5),
+                    "value": round(float(tskit.load("mutated_8_pop.ts").diversity()), 5),
                     "correct": True,
                     "feedback":
                         "Correct: since this is a site-base measure, the same value will"
