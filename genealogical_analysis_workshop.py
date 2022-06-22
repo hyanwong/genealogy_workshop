@@ -598,7 +598,7 @@ class Workbook2(Workbook):
         display_quiz([
             {
                 "question":
-                    "In plot c, inferred using the default mismatch ratio of 1, how many"
+                    "In plot (c), inferred using the default mismatch ratio of 1, how many"
                     " sites between 78 and 110 kb have been wrongly inferred to have"
                     " multiple mutations?",
                 "type": "numeric",
