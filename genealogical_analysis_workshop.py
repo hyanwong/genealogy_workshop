@@ -594,17 +594,46 @@ class Workbook2(Workbook):
             },
         ])
 
+    def Q6bonus(self):
+        display_quiz([
+            {
+                "question":
+                    "In plot c, inferred using the default mismatch ratio of 1, how many"
+                    " sites between 78 and 110 kb have been wrongly inferred to have"
+                    " multiple mutations?",
+                "type": "numeric",
+                "precision": 0,
+                "answers": [
+                    {
+                        "type": "value",
+                        "value": 2,
+                        "correct": True,
+                        "feedback":
+                            "Correct"
+                    },
+                    {
+                        "type": "range",
+                        "range": [ -100000000, 1000000], 
+                        "correct": False,
+                        "feedback":
+                            "Try again"
+                    },
+                ]
+            },
+        ])
+
+
     def Q7(self):
         display_quiz([{
             "question":
                 "What is the site-based genetic diversity in both the original and "
-                "inferred tree sequences (to 3 decimal places)?",
+                "inferred tree sequences (to 5 decimal places)?",
             "type": "numeric",
-            "precision": 3,
+            "precision": 5,
             "answers": [
                 {
                     "type": "value",
-                    "value": round(float(self.mts1.diversity()), 3),
+                    "value": round(float(self.mts.diversity()), 5),
                     "correct": True,
                     "feedback":
                         "Correct: since this is a site-base measure, the same value will"
