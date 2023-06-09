@@ -1,4 +1,5 @@
 import msprime
+import sys
 import tskit
 import tqdm
 import numpy as np
@@ -15,10 +16,53 @@ class DownloadProgressBar(tqdm.tqdm):
 
 class Workbook:
     css = """<style>
-        dl {border: green 1px solid; margin-top: 1em}
-        dt {color: white; background-color: green; padding: 4px; display: block; }
-        dd {padding: 4px;}
+        dl.exercise {border: green 1px solid; margin-top: 1em}
+        .exercise dt {color: white; background-color: green; padding: 4px; display: block; }
+        .exercise dt::before {content: '🧐 ';}
+        .exercise dd {padding: 4px;}
     </style>"""
+
+    # See https://github.com/jupyterlite/jupyterlite/issues/407#issuecomment-1353088447
+    ready_text = """
+    <h3 style="text-align: center;">Your notebook is ready to go!</h3>
+    """
+
+    pyodide_info = """
+    <script>
+    function clear_storage(e) {
+        window.indexedDB.open('JupyterLite Storage').onsuccess = function(e) {
+            // There are also other tables that we're not clearing:
+            // 'counters', 'settings', 'local-storage-detect-blob-support'
+            let tables = ['checkpoints', 'files'];
+
+            let db = e.target.result;
+            let t = db.transaction(tables, 'readwrite');
+
+            function clearTable(tablename) {
+                let st = t.objectStore(tablename);
+                st.count().onsuccess = function(e) {
+                    console.log('Deleting ' + e.target.result + ' entries from ' + tablename + '...');
+                    st.clear().onsuccess = function(e) {
+                        console.log(tablename + ' is cleared!');
+                    }
+                }
+            }
+
+            for (let tablename of tables) {
+                clearTable(tablename);
+            }
+        }
+        alert('Local storage cleared. Now reload this page');
+    };
+    </script>
+    <div class="alert alert-block alert-info">
+    NB: this notebook appears to be running directly in your browser, via
+    <a href='https://jupyterlite.readthedocs.io/en/latest/'w>JupyterLite</a>, so
+    any changes you make will be permanently stored in your browser. If you need
+    to reset workbooks to their original state (losing all your changes), click
+    <button type="button" onclick="clear_storage(this)">Clear JupyterLite local storage</button>
+    then reload this web page.</div>
+    """
 
     # Used for making SVG formatting smaller
     small_class = "x-lab-sml"
@@ -43,6 +87,12 @@ class Workbook:
         return DownloadProgressBar(
             unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1])
 
+    @property
+    def setup(self):
+        html = self.css + self.ready_text
+        if "pyodide" in sys.modules:
+            html += self.pyodide_info
+        return HTML(html)
 
 
 class Workbook1(Workbook):
@@ -50,7 +100,7 @@ class Workbook1(Workbook):
     def __init__(self):
         self.ts = self.simulate_ts()
         assert len(self.ts.site(12).mutations) == 2  # check there are sites with multiple mutations
-        self.ts.dump("simulated.trees")
+        self.ts.dump("data/simulated.trees")
 
     def simulate_ts(self):
         pop_size=1000
@@ -136,7 +186,95 @@ class Workbook1(Workbook):
             },
         ])
 
-    def Q2(self):
+    def Q2a(self):
+        display_quiz([{
+            "question": "With regard to (sample) nodes in a tree sequence, select the true statements below",
+            "type": "many_choice",
+            "answers": [
+                {"answer":
+                    "Each node in a tree sequence represents a sample",
+                    "correct": False,
+                    "feedback": "There are usually other nodes in a tree sequence, e.g. representing ancestral genomes"},
+                {"answer":
+                    "Each sample in a tree sequence is represented by a node",
+                    "correct": True,
+                    "feedback": ""},
+                {"answer":
+                    "All nodes have a unique ID starting at <code>0</code>",
+                    "correct": True,
+                    "feedback": ""},
+                {"answer":
+                    "All nodes have a unique ID starting at </code>1<code>",
+                    "correct": False,
+                    "feedback": "`Tskit` uses zero-based indexing for IDs"},
+                {"answer":
+                    "Sample nodes are always placed at the most recent time (<em>node.time=0</em>)",
+                    "correct": False,
+                    "feedback": "Although genomes are often sampled from the present day (node.time=0), this is not a strict requirement"},
+                {"answer":
+                    "Sample nodes are commonly placed at the oldest time (<em>node.time>0</em>)",
+                    "correct": False,
+                    "feedback": "Sample nodes tend to be at recent times (often at time 0)"},
+                {"answer":
+                    "Sample nodes are commonly placed at the most recent time (<em>node.time=0</em>)",
+                    "correct": True,
+                    "feedback": ""},
+                {"answer":
+                    "Although sample nodes commonly have IDs from <code>0</code> to <code>num_samples</code>, this should not be relied upon",
+                    "correct": False,
+                    "feedback": "Almost right, but think about the zero-based ID numbering"},
+                {"answer":
+                    "Although sample nodes commonly have IDs from <code>0</code> to <code>num_samples-1</code>, this should not be relied upon",
+                    "correct": True,
+                    "feedback": ""},
+                {"answer":
+                    "Sample nodes always have sequential IDs allocated from <code>0</code> upwards",
+                    "correct": False,
+                    "feedback": (
+                        "Often, software like `msprime` will assign sequential node IDs from zero upwards"
+                        "to the samples, but this is not a strict requirement, and other software may not do this")},
+                {"answer":
+                    "A node represents a haploid genome",
+                    "correct": True,
+                    "feedback": ""},
+                {"answer":
+                    "A node represents a diploid genome",
+                    "correct": False,
+                    "feedback": "Each diploid genome is represented by 2 nodes in a tree sequence"},
+            ]}
+        ])
+
+    def Q2b(self):
+        display_quiz([{
+            "question": "Harder question about sample nodes: select the true statements below",
+            "type": "many_choice",
+            "answers": [
+                {"answer":
+                    "The genealogy shows the known ancestral relationships between the sample nodes",
+                    "correct": True,
+                    "feedback": ""},
+                {"answer":
+                    "Samples are always represented by 'leaves' (tips) in the genealogy (i.e. they never have descendants)",
+                    "correct": False,
+                    "feedback": (
+                        "Yes: although tree sequences are often constructed such that samples are leaf nodes"
+                        " with no descendants, it is also possible to have 'internal nodes' as samples"
+                    )},
+                {"answer":
+                    "Samples are never represented by 'leaves' (tips) in the genealogy",
+                    "correct": False,
+                    "feedback": "It is common for a tree sequence sample to have no descendants (i.e. be a 'leaf' in the genealogy)"},
+                {"answer":
+                    "Samples are often represented by 'leaves' (tips) in the genealogy (i.e. commonly have no descendants)",
+                    "correct": True,
+                    "feedback": (
+                        "Although most of the trees in this workbook have samples on the leaves of local trees, "
+                        "is also possible to sample historical genomes, in which case samples can have descendants."
+                )},
+            ]}
+        ])
+
+    def Q3(self):
         display_quiz([
             {
                 "question": "How many mutations at site 11?",
@@ -176,7 +314,7 @@ class Workbook1(Workbook):
             },
         ])
 
-    def Q3(self):
+    def Q4(self):
         tree = self.ts.at(400_000)
         mut_counts = np.bincount([tree.num_samples(m.node) for m in tree.mutations()])
         display_quiz([
@@ -245,7 +383,7 @@ class Workbook1(Workbook):
             },
         ])
 
-    def Q4(self):
+    def Q5(self):
         display_quiz([{
             "question":
                 "What is the age (to the nearest generation) of the root in the first "
@@ -271,7 +409,7 @@ class Workbook1(Workbook):
             ]
         }])
 
-    def Q5a(self):
+    def Q6a(self):
         correct_name = self.ts.individual(self.ts.node(14).individual).metadata["name"]
         display_quiz([{
             "question":
@@ -291,7 +429,7 @@ class Workbook1(Workbook):
             ]
         }])
 
-    def Q5b(self):
+    def Q6b(self):
         display_quiz([{
             "question":
                 "How many populations are defined in this tree sequence?",
@@ -316,7 +454,7 @@ class Workbook1(Workbook):
             ]
         }])
 
-    def Q6a(self):
+    def Q7a(self):
         display_quiz([
             {
                 "question":
@@ -331,7 +469,7 @@ class Workbook1(Workbook):
             },
         ])
 
-    def Q6b(self):
+    def Q7b(self):
         for i, v in enumerate(self.ts.variants()):
             if i == 0:
                 a1 = int(v.genotypes[0])
@@ -413,7 +551,7 @@ class Workbook2(Workbook):
         Fst_values = []
         for ts in msprime.sim_ancestry(
             {i: num_deme_samples for i in range(num_demes)},
-            sequence_length=1e6,
+            sequence_length=2e6,
             demography=demography,
             recombination_rate=1e-8,
             random_seed=1234,
@@ -500,7 +638,7 @@ class Workbook2(Workbook):
             },
             {
                 "question":
-                    "How many big is the tree sequence, in MiB (binary megabytes) "
+                    "How big is the tree sequence, in MiB (binary megabytes) "
                     "to 1 decimal place?",
                 "type": "numeric",
                 "precision": 1,
@@ -633,7 +771,80 @@ class Workbook2(Workbook):
             "answers": [
                 {
                     "type": "value",
-                    "value": round(float(tskit.load("mutated_8_pop.ts").diversity()), 5),
+                    "value": round(float(tskit.load("data/mutated_8_pop.trees").diversity()), 5),
+                    "correct": True,
+                    "feedback":
+                        "Correct: since this is a site-base measure, the same value will"
+                        " be obtained regardless of how accurately the genealogy has"
+                        " been inferred."
+                },
+                {
+                    "type": "range",
+                    "range": [ -100000000, 1000000], 
+                    "correct": False,
+                    "feedback":
+                        "Try again"
+                },
+            ]
+        }])
+
+class Workbook3(Workbook):
+    def Q1(self):
+        display_quiz([
+            {
+                "question":
+                    "The first site was used for inference; what is its inference_type"
+                    " (as described in its metadata)?",
+                "type": "multiple_choice",
+                "answers": [
+                    {"answer": "parsimony", "correct": False, "feedback": "Try again"},
+                    {"answer": "full", "correct": True, "feedback": "Correct"},
+                    {"answer": "fuzzy", "correct": False, "feedback": "Try again"},
+                    {"answer": "potato", "correct": False, "feedback": "Really? You're joking, right?"},
+                ]
+            },
+        ])
+
+    def Q1bonus(self):
+        display_quiz([
+            {
+                "question":
+                    "In plot (c), inferred using the default mismatch ratio of 1, how many"
+                    " sites between 78 and 110 kb have been wrongly inferred to have"
+                    " multiple mutations?",
+                "type": "numeric",
+                "precision": 0,
+                "answers": [
+                    {
+                        "type": "value",
+                        "value": 2,
+                        "correct": True,
+                        "feedback":
+                            "Correct"
+                    },
+                    {
+                        "type": "range",
+                        "range": [ -100000000, 1000000], 
+                        "correct": False,
+                        "feedback":
+                            "Try again"
+                    },
+                ]
+            },
+        ])
+
+
+    def Q2(self):
+        display_quiz([{
+            "question":
+                "What is the site-based genetic diversity in both the original and "
+                "inferred tree sequences (to 5 decimal places)?",
+            "type": "numeric",
+            "precision": 5,
+            "answers": [
+                {
+                    "type": "value",
+                    "value": round(float(tskit.load("data/mutated_8_pop.trees").diversity()), 5),
                     "correct": True,
                     "feedback":
                         "Correct: since this is a site-base measure, the same value will"
@@ -656,4 +867,6 @@ def setup_workbook1():
 def setup_workbook2():
     return Workbook2()
         
+def setup_workbook3():
+    return Workbook3()
 

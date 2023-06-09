@@ -10,3 +10,4 @@ jupyterquiz
 tqdm
 matplotlib
 pandas
+numba
