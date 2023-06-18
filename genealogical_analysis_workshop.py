@@ -662,6 +662,54 @@ class Workbook2(Workbook):
         ])
 
     def Q4(self):
+        display_quiz([
+            {
+                "question":
+                    "What was the publication date of the study on which the AmericanAdmixture_4B11 model is based?",
+                "type": "numeric",
+                "precision": 0,
+                "answers": [
+                    {
+                        "type": "value",
+                        "value": 2011,
+                        "correct": True,
+                        "feedback": "Correct"
+                    },
+                    {
+                        "type": "default",
+                        "feedback": "It's the paper by Browning et al. Try again."
+                    }
+                ]
+            }
+        ])
+
+    def Q5(self):
+        display_quiz([
+            {
+                "question":
+                    "The average tMRCA does not differ that much between populations, showing that even between two (say) European genomes, most diversity is expect to trace back to Africa. Nevertheless, some populations have a higher average tMRCA (i.e. expected genetic diversity) than others. According to the simulation, which population has the most recent average genome-wide tMRCA (least expected genetic diversity)?",
+                "type": "multiple_choice",
+                "answers": [
+                    {"answer": "African", "correct": False, "feedback": "Try again"},
+                    {"answer": "European", "correct": False, "feedback": "Try again"},
+                    {"answer": "Asian", "correct": True, "feedback": "Correct"},
+                    {"answer": "Admixed American", "correct": False, "feedback": "Try again"},
+                ]
+            },
+            {
+                "question":
+                    "And which population has the oldest average genome-wide tMRCA (most expected genetic diversity)?",
+                "type": "multiple_choice",
+                "answers": [
+                    {"answer": "African", "correct": True, "feedback": "Correct"},
+                    {"answer": "European", "correct": False, "feedback": "Try again"},
+                    {"answer": "Asian", "correct": False, "feedback": "Try again"},
+                    {"answer": "Admixed American", "correct": False, "feedback": "Try again"},
+                ]
+            },
+        ])
+
+    def Q6(self):
         display_quiz([{
             "question":
                 "What is the site-based Fst between population 0 and population 3 "
@@ -691,7 +739,7 @@ class Workbook2(Workbook):
             ]
         }])
 
-    def Q5(self):
+    def Q7(self):
         display_quiz([{
             "question":
                 "What is the mean branch-length Fst between samples from pop_0 and pop_1"
@@ -716,77 +764,6 @@ class Workbook2(Workbook):
             ]
         }])
 
-    def Q6(self):
-        display_quiz([
-            {
-                "question":
-                    "The first site was used for inference; what is its inference_type"
-                    " (as described in its metadata)?",
-                "type": "multiple_choice",
-                "answers": [
-                    {"answer": "parsimony", "correct": False, "feedback": "Try again"},
-                    {"answer": "full", "correct": True, "feedback": "Correct"},
-                    {"answer": "fuzzy", "correct": False, "feedback": "Try again"},
-                    {"answer": "potato", "correct": False, "feedback": "Really? You're joking, right?"},
-                ]
-            },
-        ])
-
-    def Q6bonus(self):
-        display_quiz([
-            {
-                "question":
-                    "In plot (c), inferred using the default mismatch ratio of 1, how many"
-                    " sites between 78 and 110 kb have been wrongly inferred to have"
-                    " multiple mutations?",
-                "type": "numeric",
-                "precision": 0,
-                "answers": [
-                    {
-                        "type": "value",
-                        "value": 2,
-                        "correct": True,
-                        "feedback":
-                            "Correct"
-                    },
-                    {
-                        "type": "range",
-                        "range": [ -100000000, 1000000], 
-                        "correct": False,
-                        "feedback":
-                            "Try again"
-                    },
-                ]
-            },
-        ])
-
-
-    def Q7(self):
-        display_quiz([{
-            "question":
-                "What is the site-based genetic diversity in both the original and "
-                "inferred tree sequences (to 5 decimal places)?",
-            "type": "numeric",
-            "precision": 5,
-            "answers": [
-                {
-                    "type": "value",
-                    "value": round(float(tskit.load("data/mutated_8_pop.trees").diversity()), 5),
-                    "correct": True,
-                    "feedback":
-                        "Correct: since this is a site-base measure, the same value will"
-                        " be obtained regardless of how accurately the genealogy has"
-                        " been inferred."
-                },
-                {
-                    "type": "range",
-                    "range": [ -100000000, 1000000], 
-                    "correct": False,
-                    "feedback":
-                        "Try again"
-                },
-            ]
-        }])
 
 class Workbook3(Workbook):
     def Q1(self):
