@@ -1,0 +1,24 @@
+# Relate input files
+
+#Meta data
+
+#all SGDP samples
+./poplabels/SGDP.poplabels
+./poplabels/SGDP_inds.poplabels
+./poplabels/SGDP_region.poplabels
+
+#African samples
+./poplabels/SGDP_Africa.poplabels
+./poplabels/SGDP_Africa_lang.poplabels
+
+#West Eurasian samples
+./poplabels/SGDP_WestEurasia.poplabels
+
+# Input haps/sample files for subgroups of the data
+./data_subgroups/*
+
+# Genomic mask, human ancestral genome, and recombination map
+genome_mask_15.fa.gz
+human_ancestor_15.fa.gz
+genetic_map_chr15_combined_b37.txt
+    
