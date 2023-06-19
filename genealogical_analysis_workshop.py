@@ -504,8 +504,6 @@ class Workbook1(Workbook):
         ])
 
 class Workbook2(Workbook):
-    
-    
     def __init__(self):
         small_ts = msprime.sim_ancestry(
             samples=2,
@@ -529,7 +527,7 @@ class Workbook2(Workbook):
         # Second model
         deme_size = 500 # population size of each deme
         num_demes = 8
-        num_deme_samples = 25
+        num_deme_samples = 20
         mu = 1e-8
         demography = msprime.Demography.stepping_stone_model(
             [deme_size] * num_demes,
@@ -809,7 +807,6 @@ class Workbook3(Workbook):
                 ]
             },
         ])
-
 
     def Q2(self):
         display_quiz([{
