@@ -772,8 +772,16 @@ class Workbook3(Workbook):
     def __init__(self):
         import tsinfer
         import demes
-        self.sim_ts, graph = make_stepping_stone_8()
-        self.sim_ts.dump("data/simulated_8pop.trees")
+        import json
+        comp_ts, graph = make_stepping_stone_8()
+        self.sim_ts = tskit.load("data/simulated_8pop.trees")
+        # we have saved a pre-simulated version, to ensure we have a nice example
+        # because simulation on different OSes can give slightly different results
+        for i in (-1, -2):
+            assert (
+                json.dumps(json.loads(self.sim_ts.provenance(-2).record)["parameters"]) ==
+                json.dumps(json.loads(comp_ts.provenance(-2).record)["parameters"])
+            )
         tsinfer.SampleData.from_tree_sequence(self.sim_ts, path="data/simulated_8pop.samples")
         demes.dump(graph, "data/simulated_8pop.yaml")
 
