@@ -503,6 +503,30 @@ class Workbook1(Workbook):
             },
         ])
 
+def make_stepping_stone_8():
+    deme_size = 500 # population size of each deme
+    num_demes = 8
+    num_deme_samples = 20
+    mu = 1e-8
+    demography = msprime.Demography.stepping_stone_model(
+        [deme_size] * num_demes,
+        migration_rate=0.05
+    )
+    ts = msprime.sim_ancestry(
+        {i: num_deme_samples for i in range(num_demes)},
+        sequence_length=5e6, # 5 Mbp
+        demography=demography,
+        recombination_rate=1e-8, # human-like recombination rate
+        random_seed=123,
+    )
+    mts = msprime.sim_mutations(
+        ts,
+        rate=mu, # human-like mutation rate
+        random_seed=321
+    )
+    return mts, msprime.Demography.to_demes(demography), 
+    
+
 class Workbook2(Workbook):
     def __init__(self):
         small_ts = msprime.sim_ancestry(
@@ -525,26 +549,7 @@ class Workbook2(Workbook):
         self.mts1 = msprime.sim_mutations(self.ts1, rate=1e-8, random_seed=2022)
     
         # Second model
-        deme_size = 500 # population size of each deme
-        num_demes = 8
-        num_deme_samples = 20
-        mu = 1e-8
-        demography = msprime.Demography.stepping_stone_model(
-            [deme_size] * num_demes,
-            migration_rate=0.05
-        )
-        ts = msprime.sim_ancestry(
-            {i: num_deme_samples for i in range(num_demes)},
-            sequence_length=5e6, # 1 Mbp
-            demography=demography,
-            recombination_rate=1e-8, # human-like recombination rate
-            random_seed=123,
-        )
-        self.mts =  msprime.sim_mutations(
-            ts,
-            rate=mu, # human-like mutation rate
-            random_seed=321
-        )
+        self.mts, _ = make_stepping_stone_8()
         
         Fst_values = []
         for ts in msprime.sim_ancestry(
@@ -764,6 +769,14 @@ class Workbook2(Workbook):
 
 
 class Workbook3(Workbook):
+    def __init__(self):
+        import tsinfer
+        import demes
+        self.sim_ts, graph = make_stepping_stone_8()
+        self.sim_ts.dump("data/simulated_8pop.trees")
+        tsinfer.SampleData.from_tree_sequence(self.sim_ts, path="data/simulated_8pop.samples")
+        demes.dump(graph, "data/simulated_8pop.yaml")
+
     def Q1(self):
         display_quiz([
             {
@@ -785,7 +798,7 @@ class Workbook3(Workbook):
             {
                 "question":
                     "In plot (c), inferred using the default mismatch ratio of 1, how many"
-                    " sites between 78 and 110 kb have been wrongly inferred to have"
+                    " sites between 110 kb - 120 kb have been wrongly inferred to have"
                     " multiple mutations?",
                 "type": "numeric",
                 "precision": 0,
@@ -818,7 +831,7 @@ class Workbook3(Workbook):
             "answers": [
                 {
                     "type": "value",
-                    "value": round(float(tskit.load("data/mutated_8_pop.trees").diversity()), 5),
+                    "value": round(float(tskit.load("data/simulated_8pop.trees").diversity()), 5),
                     "correct": True,
                     "feedback":
                         "Correct: since this is a site-base measure, the same value will"
