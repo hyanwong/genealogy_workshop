@@ -503,7 +503,7 @@ class Workbook1(Workbook):
             },
         ])
 
-def make_stepping_stone_8(mu, rho):
+def make_stepping_stone_8(mu, rho, ploidy):
     deme_size = 500 # population size of each deme
     num_demes = 8
     num_deme_samples = 20
@@ -513,6 +513,7 @@ def make_stepping_stone_8(mu, rho):
     )
     ts = msprime.sim_ancestry(
         {i: num_deme_samples for i in range(num_demes)},
+        ploidy=None if ploidy==2 else ploidy,  # default is 2 anyway
         sequence_length=5e6, # 5 Mbp
         demography=demography,
         recombination_rate=rho,
@@ -539,6 +540,7 @@ class Workbook2(Workbook):
     
         mu = 1e-8
         rho = 1e-8
+        ploidy = 2
         # First model
 
         self.ts1 = msprime.sim_ancestry(
@@ -551,13 +553,12 @@ class Workbook2(Workbook):
         self.mts1 = msprime.sim_mutations(self.ts1, rate=mu, random_seed=2022)
     
         # Second model
-        self.mts, demography = make_stepping_stone_8(mu, rho)
+        self.mts, demography = make_stepping_stone_8(mu, rho, ploidy)
         num_deme_samples = self.mts.num_samples / demography.num_populations
         assert num_deme_samples == int(num_deme_samples)
-        
         Fst_values = []
         for ts in msprime.sim_ancestry(
-            {i: num_deme_samples for i in range(demography.num_populations)},
+            {i: num_deme_samples / ploidy for i in range(demography.num_populations)},
             sequence_length=2e6,
             demography=demography,
             recombination_rate=rho,
@@ -777,7 +778,7 @@ class Workbook3(Workbook):
         import tsinfer
         import demes
         import json
-        comp_ts, demography = make_stepping_stone_8(1e-8, 1e-8)
+        comp_ts, demography = make_stepping_stone_8(1e-8, 1e-8, 2)
         graph = msprime.Demography.to_demes(demography)
         self.sim_ts = tskit.load("data/simulated_8pop.trees")
         # we have saved a pre-simulated version, to ensure we have a nice example
