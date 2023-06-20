@@ -503,11 +503,10 @@ class Workbook1(Workbook):
             },
         ])
 
-def make_stepping_stone_8():
+def make_stepping_stone_8(mu, rho):
     deme_size = 500 # population size of each deme
     num_demes = 8
     num_deme_samples = 20
-    mu = 1e-8
     demography = msprime.Demography.stepping_stone_model(
         [deme_size] * num_demes,
         migration_rate=0.05
@@ -516,7 +515,7 @@ def make_stepping_stone_8():
         {i: num_deme_samples for i in range(num_demes)},
         sequence_length=5e6, # 5 Mbp
         demography=demography,
-        recombination_rate=1e-8, # human-like recombination rate
+        recombination_rate=rho,
         random_seed=123,
     )
     mts = msprime.sim_mutations(
@@ -524,7 +523,7 @@ def make_stepping_stone_8():
         rate=mu, # human-like mutation rate
         random_seed=321
     )
-    return mts, msprime.Demography.to_demes(demography), 
+    return mts, demography, 
     
 
 class Workbook2(Workbook):
@@ -538,25 +537,30 @@ class Workbook2(Workbook):
         )
         self.mts_small = msprime.sim_mutations(small_ts, rate=2e-7, random_seed=103)
     
+        mu = 1e-8
+        rho = 1e-8
         # First model
+
         self.ts1 = msprime.sim_ancestry(
             20_000,
             sequence_length=1e6,
-            recombination_rate=1e-8,
+            recombination_rate=rho,
             population_size=20_000,
             random_seed=2022,
         )
-        self.mts1 = msprime.sim_mutations(self.ts1, rate=1e-8, random_seed=2022)
+        self.mts1 = msprime.sim_mutations(self.ts1, rate=mu, random_seed=2022)
     
         # Second model
-        self.mts, _ = make_stepping_stone_8()
+        self.mts, demography = make_stepping_stone_8(mu, rho)
+        num_deme_samples = self.mts.num_samples / demography.num_populations
+        assert num_deme_samples == int(num_deme_samples)
         
         Fst_values = []
         for ts in msprime.sim_ancestry(
-            {i: num_deme_samples for i in range(num_demes)},
+            {i: num_deme_samples for i in range(demography.num_populations)},
             sequence_length=2e6,
             demography=demography,
-            recombination_rate=1e-8,
+            recombination_rate=rho,
             random_seed=1234,
             num_replicates=100
         ):
@@ -773,7 +777,8 @@ class Workbook3(Workbook):
         import tsinfer
         import demes
         import json
-        comp_ts, graph = make_stepping_stone_8()
+        comp_ts, demography = make_stepping_stone_8(1e-8, 1e-8)
+        graph = msprime.Demography.to_demes(demography)
         self.sim_ts = tskit.load("data/simulated_8pop.trees")
         # we have saved a pre-simulated version, to ensure we have a nice example
         # because simulation on different OSes can give slightly different results
